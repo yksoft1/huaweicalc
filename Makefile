@@ -2,7 +2,7 @@ CC		=	gcc
 CXX		=   g++
 STRIP	=	strip
 RM		=	rm -f
-
+WINDRES =	windres
 
 
 CXXFLAGS = -O3  -DNDEBUG -DHAVE_STRING_H -DUSE_OWN_MD5  \
@@ -25,12 +25,15 @@ CPPSRCS	=	main_cmd.cpp \
 			encrypt_6.cpp \
 			encrypt_7.cpp \
 			encrypt_v1.cpp \
-			md5.cpp 
-			
-				
+			md5.cpp
+	
 OBJS = $(addsuffix .o,$(basename $(CPPSRCS)))
 LIBS = -static -lm
 
+ifdef WINDIR
+	OBJS += w32dlg.rc.o
+endif
+	
 .SUFFIXES: .c.o
 .SUFFIXES: .cpp.o
 
@@ -46,5 +49,8 @@ $(TARGET):	$(OBJS)
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
+w32dlg.rc.o: w32dlg.rc
+	$(WINDRES) -i $< -o $@
+	
 clean:
 	rm -f $(TARGET) $(OBJS) 

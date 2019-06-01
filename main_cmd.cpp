@@ -1,5 +1,13 @@
 #include "encrypt.h"
+#include <ctype.h>
 #include <unistd.h>
+#ifdef WIN32
+#include <windows.h>
+#include "w32res.h"
+#endif
+
+char imeibuf[17];
+char codebuf[40];
 
 void helptxt(char* exename) {
      printf( "\n\n *** SIM unlock code calculator for HUAWEI ***\n\n\
@@ -11,10 +19,86 @@ void helptxt(char* exename) {
     -3 - generate code v201\n\n",exename);
 }
 
+#ifdef WIN32
+BOOL CALLBACK HuaweiDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+    switch(Message)
+    {
+        case WM_INITDIALOG:
+			SetWindowPos(hwnd, 
+						 HWND_TOP, 
+						 300, 
+						 200, 
+						 0, 0,          // Ignores size arguments. 
+						 SWP_NOSIZE); 
+			return TRUE;
+        case WM_COMMAND:
+            switch(LOWORD(wParam))
+            {
+                case IDOK:
+                case IDCANCEL:
+                    EndDialog(hwnd, IDCANCEL);
+					break;
+				case IDB_CALC:
+					imeibuf[16] = '\0';
+					SetDlgItemTextA(hwnd, IDT_FLASHCODE, "");
+					SetDlgItemTextA(hwnd, IDT_V1CODE, "");
+					SetDlgItemTextA(hwnd, IDT_V2CODE, "");
+					SetDlgItemTextA(hwnd, IDT_V201CODE, "");
+					
+					GetDlgItemTextA(hwnd, IDT_IMEI, imeibuf, 16);
+					if (strlen(imeibuf) != 15) {
+						MessageBox(hwnd, "Incorrect IMEI Length", "Error", MB_ICONEXCLAMATION);
+						return FALSE;
+					}
+					for(int i=0;i<15;i++) {
+						if (!isdigit (imeibuf[i])) {
+							MessageBox(hwnd, "Invalid IMEI", "Error", MB_ICONEXCLAMATION);
+							return FALSE;
+						}
+					}
+
+					encrypt_v1(imeibuf,codebuf,"e630upgrade");
+					SetDlgItemTextA(hwnd, IDT_FLASHCODE, codebuf);
+
+					encrypt_v1(imeibuf,codebuf,"hwe620datacard");
+					SetDlgItemTextA(hwnd, IDT_V1CODE, codebuf);
+
+					calc2(imeibuf,codebuf);
+					SetDlgItemTextA(hwnd, IDT_V2CODE, codebuf);
+
+					calc201(imeibuf,codebuf);
+					SetDlgItemTextA(hwnd, IDT_V201CODE, codebuf);		
+					break;
+				case IDB_REVERSE:
+					{
+						char c;
+						GetDlgItemTextA(hwnd, IDT_IMEI, imeibuf, 16);
+						if (strlen(imeibuf) != 15) {
+							MessageBox(hwnd, "Incorrect IMEI Length", "Error", MB_ICONEXCLAMATION);
+							return FALSE;
+						}
+
+						for (int i=0;i<7;i++) {
+							c=imeibuf[i];
+							imeibuf[i]=imeibuf[14-i];
+							imeibuf[14-i]=c;
+						}
+						
+						SetDlgItemTextA(hwnd, IDT_IMEI, imeibuf);
+					}
+					break;
+            }
+        break;
+        default:
+            return FALSE;
+    }
+    return TRUE;
+}
+#endif
+
 int main(int argc, char* argv[]) {
 
-char codebuf[40];
-char imeibuf[16];
 char c;
 int opt;
 int ff=0; // флаг ключей команды
@@ -24,7 +108,12 @@ int i;
 // Если аргументов нет - запускаем графическую морду
 
 if (argc == 1) {  
+#ifndef WIN32
 	helptxt(argv[0]);
+#else
+	FreeConsole();
+	DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_HUAWEICALC), GetDesktopWindow(), HuaweiDlgProc);
+#endif
 	return 0;
 }
 
