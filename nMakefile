@@ -1,5 +1,6 @@
 CC		=	cl
 CXX		=   cl
+LD		=	link
 WINDRES =	rc
 
 
@@ -12,18 +13,6 @@ CFLAGS	=	-nologo -O2  -DNDEBUG -DHAVE_STRING_H -DUSE_OWN_MD5  \
 LFLAGS	=	-nologo
 
 TARGET	=	huaweicalc.exe
-
-CPPSRCS	=	main_cmd.cpp \
-			calc.cpp \
-			encrypt_1.cpp \
-			encrypt_2.cpp \
-			encrypt_3.cpp \
-			encrypt_4.cpp \
-			encrypt_5_v2.cpp \
-			encrypt_6.cpp \
-			encrypt_7.cpp \
-			encrypt_v1.cpp \
-			md5.cpp
 	
 OBJS	=	main_cmd.obj \
 			calc.obj \
@@ -46,7 +35,7 @@ LIBS = user32.lib
 all: $(TARGET)
 
 $(TARGET):	$(OBJS)
-	$(CC) $(LFLAGS) -Fe$@ $(OBJS) $(LIBS)
+	$(LD) $(LFLAGS) -OUT:$@ $(OBJS) $(LIBS)
 
 .c.obj:
 	$(CC) $(CFLAGS) -c -Fo$@ $<
