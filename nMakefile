@@ -1,0 +1,61 @@
+CC		=	cl
+CXX		=   cl
+WINDRES =	rc
+
+
+CXXFLAGS =  -nologo -O2  -DNDEBUG -DHAVE_STRING_H -DUSE_OWN_MD5  \
+			-I. \
+
+CFLAGS	=	-nologo -O2  -DNDEBUG -DHAVE_STRING_H -DUSE_OWN_MD5  \
+			 -I. \
+
+LFLAGS	=	-nologo
+
+TARGET	=	huaweicalc.exe
+
+CPPSRCS	=	main_cmd.cpp \
+			calc.cpp \
+			encrypt_1.cpp \
+			encrypt_2.cpp \
+			encrypt_3.cpp \
+			encrypt_4.cpp \
+			encrypt_5_v2.cpp \
+			encrypt_6.cpp \
+			encrypt_7.cpp \
+			encrypt_v1.cpp \
+			md5.cpp
+	
+OBJS	=	main_cmd.obj \
+			calc.obj \
+			encrypt_1.obj \
+			encrypt_2.obj \
+			encrypt_3.obj \
+			encrypt_4.obj \
+			encrypt_5_v2.obj \
+			encrypt_6.obj \
+			encrypt_7.obj \
+			encrypt_v1.obj \
+			md5.obj \
+			w32dlg.res
+			
+LIBS = user32.lib
+
+.SUFFIXES: .c.o
+.SUFFIXES: .cpp.o
+
+all: $(TARGET)
+
+$(TARGET):	$(OBJS)
+	$(CC) $(LFLAGS) -Fe$@ $(OBJS) $(LIBS)
+
+.c.obj:
+	$(CC) $(CFLAGS) -c -Fo$@ $<
+
+.cpp.obj:
+	$(CXX) $(CXXFLAGS) -c -Fo$@ $<
+
+.rc.res: 
+	$(WINDRES) -fo $@ $< 
+	
+clean:
+	del $(TARGET) $(OBJS) 

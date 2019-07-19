@@ -1,6 +1,10 @@
 #include "encrypt.h"
 #include <ctype.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#else
+#include "vcgetopt.h"
+#endif
 #ifdef WIN32
 #include <windows.h>
 #include "w32res.h"

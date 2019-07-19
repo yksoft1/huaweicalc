@@ -40,6 +40,10 @@
 #endif
 #endif
 
+#ifdef _MSC_VER
+#include <string.h>
+#endif
+
 #include "md5.h"
 
 /* Little-endian byte-swapping routines.  Note that these do not
